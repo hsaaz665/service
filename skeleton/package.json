@@ -1,0 +1,13 @@
+{
+  "name": "${{ values.name }}",
+  "version": "1.0.0",
+  "description": "${{ values.description }}",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000"
+  },
+  "keywords": ["backstage", "test"],
+  "author": "${{ values.owner }}",
+  "license": "MIT"
+}
