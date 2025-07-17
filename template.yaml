@@ -1,0 +1,80 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: simple-service
+  title: Service Simple
+  description: Template minimal pour tester GitHub
+  tags:
+    - test
+    - simple
+spec:
+  owner: platform-team
+  type: service
+  parameters:
+    - title: Informations de base
+      required:
+        - name
+        - description
+      properties:
+        name:
+          title: Nom du service
+          type: string
+          description: Nom du service (kebab-case)
+          pattern: '^[a-z][a-z0-9-]*[a-z0-9]$'
+          ui:placeholder: 'mon-service-test'
+        description:
+          title: Description
+          type: string
+          description: Description courte
+          ui:placeholder: 'Service de test pour Backstage'
+        owner:
+          title: Propriétaire
+          type: string
+          description: Qui est responsable
+          default: platform-team
+
+    - title: Repository
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+  steps:
+    - id: fetch
+      name: Générer les fichiers
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+
+    - id: publish
+      name: Publier sur GitHub
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: ${{ parameters.description }}
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: main
+
+    - id: register
+      name: Enregistrer dans le Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Voir dans le Catalog
+        url: /catalog/default/component/${{ parameters.name }}
