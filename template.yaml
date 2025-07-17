@@ -19,20 +19,14 @@ spec:
         name:
           title: Nom du service
           type: string
-          description: Nom du service (kebab-case)
           pattern: '^[a-z][a-z0-9-]*[a-z0-9]$'
-          ui:placeholder: 'mon-service-test'
         description:
           title: Description
           type: string
-          description: Description courte
-          ui:placeholder: 'Service de test pour Backstage'
         owner:
           title: Propriétaire
           type: string
-          description: Qui est responsable
           default: platform-team
-
     - title: Repository
       required:
         - repoUrl
@@ -44,7 +38,6 @@ spec:
           ui:options:
             allowedHosts:
               - github.com
-
   steps:
     - id: fetch
       name: Générer les fichiers
@@ -55,7 +48,6 @@ spec:
           name: ${{ parameters.name }}
           description: ${{ parameters.description }}
           owner: ${{ parameters.owner }}
-
     - id: publish
       name: Publier sur GitHub
       action: publish:github
@@ -64,17 +56,13 @@ spec:
         description: ${{ parameters.description }}
         repoUrl: ${{ parameters.repoUrl }}
         defaultBranch: main
-
     - id: register
       name: Enregistrer dans le Catalog
       action: catalog:register
       input:
         repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
         catalogInfoPath: '/catalog-info.yaml'
-
   output:
     links:
       - title: Repository
         url: ${{ steps.publish.output.remoteUrl }}
-      - title: Voir dans le Catalog
-        url: /catalog/default/component/${{ parameters.name }}
