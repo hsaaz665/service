@@ -1,68 +1,58 @@
-apiVersion: scaffolder.backstage.io/v1beta3
-kind: Template
+apiVersion: backstage.io/v1alpha1
+kind: Component
 metadata:
-  name: simple-service
-  title: Service Simple
-  description: Template minimal pour tester GitHub
+  name: inventory-api
+  description: Inventory Management API
   tags:
-    - test
-    - simple
+    - nodejs
+    - api
+    - microservice
+    - mongodb
+  links:
+    - url: https://inventory-api.example.com/docs
+      title: API Documentation
+      icon: docs
+    - url: https://grafana.example.com/d/inventory-dashboard
+      title: Monitoring Dashboard
+      icon: dashboard
+    - url: https://github.com/company/inventory-api
+      title: Source Code
+      icon: github
+    - url: https://inventory-api.example.com/health
+      title: Health Check
+      icon: check
+    - url: https://slack.com/channels/team-inventory
+      title: Team Channel
+      icon: chat
+    - url: https://jira.example.com/projects/INV
+      title: Project Board
+      icon: work
+    - url: https://inventory-api.example.com
+      title: Production API
+      icon: web
+    - url: https://runbook.example.com/inventory-api
+      title: Runbook
+      icon: help
+  annotations:
+    backstage.io/source-template: template:default/nodejs-microservice-template
+    backstage.io/techdocs-ref: dir:.
+    github.com/project-slug: company/inventory-api
+    backstage.io/kubernetes-id: inventory-api
+    backstage.io/kubernetes-namespace: production
+    prometheus.io/rule: inventory-api-alerts
+    sonarqube.org/project-key: inventory-api
+    jenkins.io/job-full-name: company/inventory-api/main
 spec:
-  owner: platform-team
   type: service
-  parameters:
-    - title: Informations de base
-      required:
-        - name
-        - description
-      properties:
-        name:
-          title: Nom du service
-          type: string
-          pattern: '^[a-z][a-z0-9-]*[a-z0-9]$'
-        description:
-          title: Description
-          type: string
-        owner:
-          title: Propriétaire
-          type: string
-          default: platform-team
-    - title: Repository
-      required:
-        - repoUrl
-      properties:
-        repoUrl:
-          title: Repository Location
-          type: string
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
-  steps:
-    - id: fetch
-      name: Générer les fichiers
-      action: fetch:template
-      input:
-        url: ./skeleton
-        values:
-          name: ${{ parameters.name }}
-          description: ${{ parameters.description }}
-          owner: ${{ parameters.owner }}
-    - id: publish
-      name: Publier sur GitHub
-      action: publish:github
-      input:
-        allowedHosts: ['github.com']
-        description: ${{ parameters.description }}
-        repoUrl: ${{ parameters.repoUrl }}
-        defaultBranch: main
-    - id: register
-      name: Enregistrer dans le Catalog
-      action: catalog:register
-      input:
-        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
-        catalogInfoPath: '/catalog-info.yaml'
-  output:
-    links:
-      - title: Repository
-        url: ${{ steps.publish.output.remoteUrl }}
+  lifecycle: production
+  owner: team-platform
+  system: e-commerce-platform
+  dependsOn: 
+    - 'resource:inventory-db'
+    - 'component:auth-service'
+    - 'component:notification-service'
+  providesApis: 
+    - 'api:inventory-api-v1'
+  consumesApis:
+    - 'api:user-service-v1'
+    - 'api:payment-service-v1'
